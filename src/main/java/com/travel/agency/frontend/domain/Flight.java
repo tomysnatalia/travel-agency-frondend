@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Getter
@@ -11,10 +13,12 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Flight {
 
-    private Long id;
     private String departure;
     private String arrival;
+    private LocalDate departureDate;
+    private LocalDate returnDate;
     int price;
+
 
     @Override
     public boolean equals(Object o) {
@@ -30,8 +34,13 @@ public class Flight {
         return Objects.hash(departure, arrival);
     }
 
-    public void setId(Long id) {
-        this.id = id;
+
+    public void setFlightDate(LocalDate departureDate) {
+        this.departureDate = departureDate;
+    }
+
+    public void setReturnFlightDate(LocalDate returnFlightDate) {
+        this.returnDate = returnFlightDate;
     }
 
     public void setDeparture(String departure) {
@@ -45,4 +54,5 @@ public class Flight {
     public void setPrice(int price) {
         this.price = price;
     }
+
 }
