@@ -3,9 +3,8 @@ package com.travel.agency.frontend.service;
 import com.travel.agency.frontend.domain.Flight;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 

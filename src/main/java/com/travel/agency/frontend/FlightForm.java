@@ -41,14 +41,14 @@ public class FlightForm extends FormLayout {
     private void save() {
        Flight flight = binder.getBean();
         service.save(flight);
-       // mainView.refresh();
+        mainView.refreshFlight();
         setFlight(null);
     }
 
     private void delete() {
         Flight flight = binder.getBean();
         service.delete(flight);
-       // mainView.refresh();
+        mainView.refreshFlight();
         setFlight(null);
     }
 
