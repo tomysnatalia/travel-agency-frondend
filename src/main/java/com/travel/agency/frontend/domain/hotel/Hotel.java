@@ -10,7 +10,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Hotel {
-
+    private String hotelId;
     private String hotelName;
     private String locationCountry;
     private String locationCity;
@@ -21,6 +21,10 @@ public class Hotel {
     private int pricePerNightForKid;
     private FoodOption foodOption;
     private DurationOption duration;
+
+    public void setHotelId(String hotelId) {
+        this.hotelId = hotelId;
+    }
 
     public void setHotelName(String hotelName) {
         this.hotelName = hotelName;

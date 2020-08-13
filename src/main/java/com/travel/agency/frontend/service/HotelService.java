@@ -36,9 +36,9 @@ public class HotelService {
 
     public static Set<Hotel> exampleData() {
         Set<Hotel> hotels = new HashSet<>();
-        hotels.add(new Hotel("Room Mate Larios", "Italy", "Roma", "Roma", HotelRating.three, 520, 170, FoodOption.BB, DurationOption.week));
-        hotels.add(new Hotel("Azuuro Beach", "Spain", "Malaga", "Malaga", HotelRating.four, 450, 150, FoodOption.HB, DurationOption.week));
-        hotels.add(new Hotel("La Moraga de PonienteB", "Greece", "Leptokaria", "Athens", HotelRating.five, 520, 170, FoodOption.AllInclusive, DurationOption.twoWeeks));
+        hotels.add(new Hotel("74","Room Mate Larios", "Italy", "Roma", "Roma", HotelRating.three, 520, 170, FoodOption.BB, DurationOption.week));
+        hotels.add(new Hotel("85","Azuuro Beach", "Spain", "Malaga", "Malaga", HotelRating.four, 450, 150, FoodOption.HB, DurationOption.week));
+        hotels.add(new Hotel("75", "La Moraga de PonienteB", "Greece", "Leptokaria", "Athens", HotelRating.five, 520, 170, FoodOption.AllInclusive, DurationOption.twoWeeks));
         return hotels;
     }
 
