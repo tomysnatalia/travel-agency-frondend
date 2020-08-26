@@ -1,5 +1,8 @@
 package com.travel.agency.frontend;
 
+import com.travel.agency.frontend.backend.flight.FlightFacade;
+import com.travel.agency.frontend.backend.hotel.HotelFacade;
+import com.travel.agency.frontend.backend.reservation.ReservationFacade;
 import com.travel.agency.frontend.domain.Flight;
 import com.travel.agency.frontend.domain.Reservation;
 import com.travel.agency.frontend.domain.hotel.DurationOption;
@@ -9,9 +12,6 @@ import com.travel.agency.frontend.domain.hotel.HotelRating;
 import com.travel.agency.frontend.form.FlightForm;
 import com.travel.agency.frontend.form.HotelForm;
 import com.travel.agency.frontend.form.ReservationForm;
-import com.travel.agency.frontend.service.FlightService;
-import com.travel.agency.frontend.service.HotelService;
-import com.travel.agency.frontend.service.ReservationService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -21,45 +21,61 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
+import org.springframework.stereotype.Component;
 
-@Route
+@Component
+@UIScope
+@Route()
 public class MainView extends VerticalLayout {
 
-    private ReservationService reservationService = ReservationService.getInstance();
-    private FlightService flightService = FlightService.getInstance();
-    private HotelService hotelService = HotelService.getInstance();
+    private final ReservationFacade reservationFacade;
+    private ReservationForm reservationForm;
+    private Grid<Reservation> reservationGrid;
 
-    private Grid reservationGrid = new Grid<>(Reservation.class);
-    private Grid gridFlight = new Grid<>(Flight.class);
-    private Grid hotelGrid = new Grid<>(Hotel.class);
+    private final FlightFacade flightFacade;
+    private FlightForm flightForm;
+    private Grid<Flight> flightGrid;
 
+    private final HotelFacade hotelFacade;
+    private HotelForm hotelForm;
+    private Grid<Hotel> hotelGrid;
 
-    public TextField reservationNumber = new TextField();
+    public TextField reservationNumber = new TextField("reservation number");
 
     private Button buttonFlight = new Button("Flights");
     private Button buttonHotels = new Button("Hotels");
     private Button buttonReservation = new Button("Reservation");
 
-    private FlightForm flightForm = new FlightForm(this);
-    private HotelForm hotelForm = new HotelForm(this);
-    private ReservationForm reservationForm = new ReservationForm( this);
-
     private TextField departure = new TextField("departure");
     private TextField arrival = new TextField("arrival");
     private DatePicker departureDate = new DatePicker("departure date");
     private DatePicker returnDate = new DatePicker("return date");
+    private TextField flightNumber = new TextField("flight number");
 
-    private TextField hotelId = new TextField("hotelId");
     private TextField hotelName = new TextField();
     private TextField locationCountry = new TextField();
     private TextField locationCity = new TextField();
-    private TextField closerAirport = new TextField();
     private ComboBox hotelOfficialRating = new ComboBox<>("Hotel Stars");
     private ComboBox foodOption = new ComboBox<>("Food option");
     private ComboBox duration = new ComboBox<>("Duration");
 
+    private Button addFlight = new Button("Add flight");
+    private Button addHotel = new Button("Add hotel");
+    private Button addReservation = new Button("Add reservation");
 
-    public MainView() {
+    public MainView(ReservationFacade reservationFacade, FlightFacade flightFacade, HotelFacade hotelFacade) {
+        this.reservationFacade = reservationFacade;
+        this.reservationForm = new ReservationForm(this.reservationFacade, this);
+        this.reservationGrid = new Grid<>(Reservation.class);
+
+        this.flightFacade = flightFacade;
+        this.flightForm = new FlightForm(this.flightFacade, this);
+        this.flightGrid = new Grid<>(Flight.class);
+
+        this.hotelFacade = hotelFacade;
+        this.hotelForm = new HotelForm(this.hotelFacade, this);
+        this.hotelGrid = new Grid<>(Hotel.class);
 
         HorizontalLayout toolBar = new HorizontalLayout(buttonFlight, buttonHotels, buttonReservation);
         add(toolBar);
@@ -67,31 +83,49 @@ public class MainView extends VerticalLayout {
 
         buttonFlight.addClickListener(e -> {
             removeAll();
-            add(toolBar);
-            HorizontalLayout mainContent = new HorizontalLayout(departure, arrival, departureDate, returnDate);
+            HorizontalLayout toolBar2 = new HorizontalLayout(buttonFlight, buttonHotels, buttonReservation, addFlight);
+            add(toolBar2);
+            addFlight.addClickListener(add -> {
+                flightGrid.asSingleSelect().clear();
+                flightForm.setFlight(new Flight());
+            });
+
+            flightForm.setFlight(null);
+
+            HorizontalLayout mainContent = new HorizontalLayout(departure, arrival, flightNumber, departureDate, returnDate);
             add(mainContent);
-            gridFlight.setColumns("flightId", "departure", "arrival", "departureDate", "returnDate", "price");
-            add(gridFlight);
-            departure.setPlaceholder("Filter by departure");
+            flightGrid.setColumns("id", "departure", "arrival", "departureDate", "returnDate", "flightNumber", "price");
+            add(flightGrid, flightForm);
+
+            departure.setPlaceholder("filter by departure");
             departure.setClearButtonVisible(true);
-            departure.setValueChangeMode(ValueChangeMode.EAGER);
             departure.addValueChangeListener(f -> updateDeparture());
 
-            arrival.setPlaceholder("Filter by arrival");
+            arrival.setPlaceholder("filter by arrival");
             arrival.setClearButtonVisible(true);
-            arrival.setValueChangeMode(ValueChangeMode.EAGER);
             arrival.addValueChangeListener(f -> updateArrival());
-            setSizeFull();
+
+            flightNumber.setPlaceholder("filter by flight number");
+            flightNumber.setClearButtonVisible(true);
+            flightNumber.addValueChangeListener(f -> updateFlightNumber());
+
+            departureDate.setPlaceholder("filter by departure date");
+            departureDate.addValueChangeListener(f -> updateDepartureDate());
+
+            returnDate.setPlaceholder("filter by return date");
+            returnDate.addValueChangeListener(f -> updateReturnDate());
+
+            flightGrid.setSizeFull();
             refreshFlight();
             add(flightForm);
             flightForm.setFlight(null);
-            gridFlight.asSingleSelect().addValueChangeListener(event -> flightForm.setFlight((Flight) gridFlight.asSingleSelect().getValue()));
-
+            flightGrid.asSingleSelect().addValueChangeListener(event -> flightForm.setFlight(flightGrid.asSingleSelect().getValue()));
         });
 
         buttonHotels.addClickListener(e -> {
             removeAll();
-            add(toolBar);
+            HorizontalLayout toolBar3 = new HorizontalLayout(buttonFlight, buttonHotels, buttonReservation, addHotel);
+            add(toolBar3);
             hotelName.setPlaceholder("Hotel name");
             hotelName.setClearButtonVisible(true);
             hotelName.setValueChangeMode(ValueChangeMode.EAGER);
@@ -107,30 +141,26 @@ public class MainView extends VerticalLayout {
             locationCity.setValueChangeMode(ValueChangeMode.EAGER);
             locationCity.addValueChangeListener(h -> searchByCity());
 
-            closerAirport.setPlaceholder("Airport");
-            closerAirport.setClearButtonVisible(true);
-            closerAirport.setValueChangeMode(ValueChangeMode.EAGER);
-            closerAirport.addValueChangeListener(h -> searchByAirport());
 
             hotelOfficialRating.setItems(HotelRating.values());
             hotelOfficialRating.setPlaceholder("Rating stars");
-            hotelOfficialRating.setClearButtonVisible(true);
+            //hotelOfficialRating.setClearButtonVisible(true);
             hotelOfficialRating.addValueChangeListener(h -> searchByRating());
 
             foodOption.setItems(FoodOption.values());
             foodOption.setPlaceholder("Food options");
-            foodOption.setClearButtonVisible(true);
+            //foodOption.setClearButtonVisible(true);
             foodOption.addValueChangeListener(h -> searchByFoodOption());
 
             duration.setItems(DurationOption.values());
             duration.setPlaceholder("Duration");
-            duration.setClearButtonVisible(true);
+            //duration.setClearButtonVisible(true);
             duration.addValueChangeListener(h -> searchByDuration());
 
-            hotelGrid.setColumns("hotelId", "hotelName", "locationCountry", "locationCity", "closerAirport", "hotelOfficialRating", "foodOption", "duration", "pricePerNightForAdult", "pricePerNightForKid");
-            HorizontalLayout toolBar2 = new HorizontalLayout(hotelName, locationCountry, locationCity, closerAirport);
-            HorizontalLayout toolBar3 = new HorizontalLayout( hotelOfficialRating, foodOption, duration);
-            add(toolBar2, toolBar3);
+            hotelGrid.setColumns("id", "hotelName", "locationCountry", "locationCity", "closerAirport", "hotelOfficialRating", "foodOption", "duration", "pricePerNightForAdult", "pricePerNightForKid");
+            HorizontalLayout horizontalLayout = new HorizontalLayout(hotelName, locationCountry, locationCity);
+            HorizontalLayout horizontalLayout2 = new HorizontalLayout(hotelOfficialRating, foodOption, duration);
+            add(horizontalLayout, horizontalLayout2);
             add(hotelGrid);
             setSizeFull();
             refreshHotel();
@@ -142,59 +172,67 @@ public class MainView extends VerticalLayout {
 
         buttonReservation.addClickListener(e -> {
             removeAll();
-            add(toolBar);
+            HorizontalLayout toolBar4 = new HorizontalLayout(buttonFlight, buttonHotels, buttonReservation, addReservation);
+            add(toolBar4);
             add(reservationNumber);
-            reservationGrid.setColumns("reservationId", "flightId", "hotelId", "name", "surname", "email", "phoneNumber", "numberOfAdults", "numberOfKids", "hotelPrice", "deposit", "paymentStatus", "paymentDepositStatus", "paymentDate", "hotelPriceWithFlight");
+            reservationGrid.setColumns("id", "flightId", "hotelId", "name", "surname", "email", "phoneNumber", "numberOfAdults", "numberOfKids", "hotelPrice", "deposit", "paymentStatus", "paymentDepositStatus", "paymentDate", "hotelPriceWithFlight");
             add(reservationGrid);
             reservationNumber.setPlaceholder("Reservation number");
             reservationNumber.setClearButtonVisible(true);
             reservationNumber.addValueChangeListener(event -> search());
             setSizeFull();
+            refreshReservation();
             add(reservationForm);
             reservationForm.setReservation(null);
-            reservationGrid.asSingleSelect().addValueChangeListener(event -> reservationForm.setReservation((Reservation) reservationGrid.asSingleSelect().getValue())) ;
+            reservationGrid.asSingleSelect().addValueChangeListener(event -> reservationForm.setReservation((Reservation) reservationGrid.asSingleSelect().getValue()));
         });
     }
-    public void search () {
-        reservationGrid.setItems(reservationService.findById(String.valueOf(reservationNumber.getValue())));
+
+    public void search() {
+        //reservationGrid.setItems(reservationFacade.findBy(Long.valueOf(String.valueOf(reservationNumber.getValue()))));
     }
 
     public void updateDeparture() {
-        gridFlight.setItems(flightService.findByDeparture(departure.getValue()));
-    }
+        flightGrid.setItems(flightFacade.findByDeparture(departure.getValue()));}
 
     public void updateArrival() {
-        gridFlight.setItems(flightService.findByArrival(arrival.getValue()));
-    }
+        flightGrid.setItems(flightFacade.findByArrival(arrival.getValue()));}
 
+    public void updateFlightNumber() {
+        flightGrid.setItems(flightFacade.findByFlightNumber(flightNumber.getValue()));}
+
+    public void updateDepartureDate() {
+        flightGrid.setItems(flightFacade.findByDepartureDate(String.valueOf(departureDate.getValue()))); }
+
+    public void updateReturnDate(){
+        flightGrid.setItems(flightFacade.findByReturnDate(String.valueOf(returnDate.getValue()))); }
 
     public void refreshFlight() {
-        gridFlight.setItems(flightService.getFlight());
-    }
+        flightGrid.setItems(flightFacade.getAllFlights());}
 
     public void refreshHotel() {
-        hotelGrid.setItems(hotelService.getHotel());
+        hotelGrid.setItems(hotelFacade.getAllHotels());}
+
+    public void refreshReservation() {
+        reservationGrid.setItems(reservationFacade.getAllReservations());}
+
+    private void searchByHotel() { hotelGrid.setItems(hotelFacade.findByHotelName(hotelName.getValue()));
     }
 
-    private void searchByHotel() {
-        hotelGrid.setItems(hotelService.findByHotelName(hotelName.getValue()));
+    private void searchByCountry() { hotelGrid.setItems(hotelFacade.findByLocationCountry(locationCountry.getValue()));
     }
 
-    private void searchByCountry() { hotelGrid.setItems(hotelService.findByLocationCountry(locationCountry.getValue())); }
-
-    private void searchByCity() {
-        hotelGrid.setItems(hotelService.findByLocationCity(locationCity.getValue()));
+    private void searchByCity() { hotelGrid.setItems(hotelFacade.findByLocationCity(locationCity.getValue()));
     }
 
-    private void searchByAirport() {
-        hotelGrid.setItems(hotelService.findByCloserAirport(closerAirport.getValue()));
+    private void searchByFoodOption() { hotelGrid.setItems(hotelFacade.findByFoodOption(String.valueOf(foodOption.getValue())));
     }
 
-    private void searchByFoodOption() { hotelGrid.setItems(hotelService.findByFoodOption(String.valueOf(foodOption.getValue()))); }
+    private void searchByRating() { hotelGrid.setItems(hotelFacade.findByHotelOfficialRating(String.valueOf(hotelOfficialRating.getValue())));
+    }
 
-    private void searchByRating() { hotelGrid.setItems(hotelService.findByHotelOfficialRating(String.valueOf(hotelOfficialRating.getValue()))); }
-
-    private void searchByDuration() { hotelGrid.setItems(hotelService.findByDuration(String.valueOf(duration.getValue()))); }
+    private void searchByDuration() { //hotelGrid.setItems(hotelFacade.findByDuration(String.valueOf(duration.getValue())));
+    }
 }
 
 

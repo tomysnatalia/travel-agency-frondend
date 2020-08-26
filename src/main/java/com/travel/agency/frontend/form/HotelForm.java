@@ -1,64 +1,50 @@
 package com.travel.agency.frontend.form;
 
 import com.travel.agency.frontend.MainView;
-import com.travel.agency.frontend.domain.Flight;
-import com.travel.agency.frontend.domain.Reservation;
-import com.travel.agency.frontend.domain.hotel.DurationOption;
-import com.travel.agency.frontend.domain.hotel.FoodOption;
+import com.travel.agency.frontend.backend.hotel.HotelFacade;
 import com.travel.agency.frontend.domain.hotel.Hotel;
-import com.travel.agency.frontend.domain.hotel.HotelRating;
-import com.travel.agency.frontend.service.HotelService;
-import com.travel.agency.frontend.service.ReservationService;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.spring.annotation.UIScope;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class HotelForm extends VerticalLayout {
+@Component
+@UIScope
+public class HotelForm extends FormLayout {
 
-    private ReservationService reservationService;
-    private HotelService hotelService = HotelService.getInstance();
-    private Grid hotelGrid = new Grid<>(Hotel.class);
+    private MainView mainView;
+    private HotelFacade hotelFacade;
 
-    private TextField hotelId = new TextField("hotelId");
-
-    private TextField name = new TextField("name");
+    private TextField id = new TextField("id");
+    private TextField hotelName = new TextField("name");
     private TextField surname = new TextField("surname");
     private TextField email = new TextField("email");
     private TextField phoneNumber = new TextField("phoneNumber");
     private TextField numberOfAdults = new TextField("numberOfAdults");
     private TextField numberOfKids= new TextField("numberOfKids");
 
-    private MainView mainView;
-
-    private Button makeReservation = new Button("make reservation");
-    private Button goBack = new Button ("go back");
+    private Button save = new Button("Save");
+    private Button delete= new Button("Delete");
+    private Button back = new Button("back");
 
     Binder<Hotel> binder = new Binder<>(Hotel.class);
 
-    public HotelForm(MainView mainView) {
+    @Autowired
+    public HotelForm(HotelFacade hotelFacade, MainView mainView) {
+        this.hotelFacade= hotelFacade;
         this.mainView = mainView;
 
-        HorizontalLayout buttons = new HorizontalLayout(makeReservation, goBack);
-        add(hotelId, name, surname, email, phoneNumber, numberOfAdults, numberOfKids, buttons);
+        HorizontalLayout buttons = new HorizontalLayout(save, delete, back);
+        add(id, , surname, email, phoneNumber, numberOfAdults, numberOfKids, buttons);
         binder.bindInstanceFields(this);
 
-        makeReservation.addClickListener(event -> goToReservation());
-        goBack.addClickListener(event -> back());
-    }
-
-    public void goToReservation() {
-        Reservation reservation1 = new Reservation("56", null, "85", null, null, null, null, null, null, null,null,"false", "false", "2020-09-02",null);
-        reservationService.save(reservation1);
-        setHotel(null);
-    }
-
-    public void back() {
-        setHotel(null);
+        save.addClickListener(event -> save());
+        delete.addClickListener(event -> delete());
+        back.addClickListener(event -> back());
     }
 
     public void setHotel(Hotel hotel) {
@@ -69,6 +55,31 @@ public class HotelForm extends VerticalLayout {
             setVisible(true);
         }
     }
+
+    public void save() {
+        Hotel hotel = binder.getBean();
+        if(hotel.getId().isEmpty()) {
+            hotelFacade.createHotel(hotel);
+        } else {
+            hotelFacade.updateHotel(hotel);
+        }
+        mainView.refreshHotel();
+        setHotel(null);
+    }
+
+    public void delete() {
+        Hotel hotel = binder.getBean();
+        hotelFacade.deleteHotel(Long.parseLong(hotel.getId()));
+
+        mainView.refreshHotel();
+        setHotel(null);
+    }
+
+    public void back() {
+        setHotel(null);
+    }
+
+
 }
 
 

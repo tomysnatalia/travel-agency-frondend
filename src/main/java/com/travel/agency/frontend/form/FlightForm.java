@@ -1,60 +1,51 @@
 package com.travel.agency.frontend.form;
 
 import com.travel.agency.frontend.MainView;
+import com.travel.agency.frontend.backend.flight.FlightFacade;
 import com.travel.agency.frontend.domain.Flight;
-import com.travel.agency.frontend.domain.Reservation;
-import com.travel.agency.frontend.service.FlightService;
-import com.travel.agency.frontend.service.ReservationService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.spring.annotation.UIScope;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-
+@Component
+@UIScope
 public class FlightForm extends FormLayout {
 
+    private MainView mainView;
+    private FlightFacade flightFacade;
 
-    private ReservationService reservationService = ReservationService.getInstance();
-    private FlightService flightService = FlightService.getInstance();
-    private Grid gridFlight = new Grid<>(Flight.class);
-
-    private TextField flightId = new TextField("flight number");
+    private TextField id = new TextField("id");
+    private TextField flightNumber = new TextField("flight number");
     private TextField departure = new TextField("departure");
     private TextField arrival = new TextField("arrival");
-    private TextField name = new TextField("name");
-    private TextField surname = new TextField("surname");
-    private TextField email = new TextField("email");
-    private TextField phoneNumber = new TextField("phone number");
-    private TextField numberOfAdults = new TextField("adults");
-    private TextField numberOfKids= new TextField("kids");
     private DatePicker departureDate = new DatePicker("departure date");
     private DatePicker returnDate = new DatePicker("return date");
+    private TextField price = new TextField("price");
 
-    private MainView mainView;
-
-    private Button makeReservation = new Button("make reservation");
-    private Button goBack = new Button("go back");
+    private Button save = new Button("Save");
+    private Button delete= new Button("Delete");
+    private Button back = new Button("back");
 
     Binder<Flight> binder = new Binder<>(Flight.class);
 
-    public FlightForm(MainView mainView) {
+    @Autowired
+    public FlightForm(FlightFacade flightFacade, MainView mainView) {
+        this.flightFacade= flightFacade;
         this.mainView = mainView;
 
-        HorizontalLayout buttons = new HorizontalLayout(makeReservation, goBack);
-        add(flightId, departure, arrival, name, surname, email, phoneNumber, numberOfAdults, numberOfKids, departureDate, returnDate, buttons);
+        HorizontalLayout buttons = new HorizontalLayout(save, delete, back);
+        add(id, departure, arrival, departureDate, returnDate, flightNumber, price,  buttons);
         binder.bindInstanceFields(this);
 
-        makeReservation.addClickListener(event -> getFlightToReservation());
-        goBack.addClickListener(event -> back());
-    }
-
-    private void  getFlightToReservation() {
-        Reservation reservation1 = new Reservation("56", "75", null, null, null, null, null, null, null, null,null,"false", "false", "2020-09-02",null);
-        reservationService.save(reservation1);
-        setFlight(null);
+        save.addClickListener(event -> save());
+        delete.addClickListener(event -> delete());
+        back.addClickListener(event -> back());
     }
 
     public void setFlight(Flight flight) {
@@ -63,11 +54,31 @@ public class FlightForm extends FormLayout {
             setVisible(false);
         } else {
             setVisible(true);
+            departure.focus();
         }
+    }
+
+    public void save() {
+        Flight flight = binder.getBean();
+        if(flight.getId().isEmpty()) {
+            flightFacade.createFlight(flight);
+        } else {
+            flightFacade.updateFlight(flight);
+        }
+        mainView.refreshFlight();
+        setFlight(null);
+
+    }
+
+    public void delete() {
+        Flight flight = binder.getBean();
+        flightFacade.deleteFlight(Long.parseLong(flight.getId()));
+
+        mainView.refreshFlight();
+        setFlight(null);
     }
 
     public void back() {
         setFlight(null);
     }
-
 }

@@ -1,6 +1,8 @@
 package com.travel.agency.frontend.domain.hotel;
 
+import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import lombok.AllArgsConstructor;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,20 +12,20 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Hotel {
-    private String hotelId;
+    private String id;
     private String hotelName;
     private String locationCountry;
     private String locationCity;
     private String closerAirport;
-    private HotelRating hotelOfficialRating;
+    private String hotelOfficialRating;
 
-    private int pricePerNightForAdult;
-    private int pricePerNightForKid;
-    private FoodOption foodOption;
-    private DurationOption duration;
+    private String pricePerNightForAdult;
+    private String pricePerNightForKid;
+    private String foodOption;
+    private String duration;
 
-    public void setHotelId(String hotelId) {
-        this.hotelId = hotelId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setHotelName(String hotelName) {
@@ -42,23 +44,23 @@ public class Hotel {
         this.closerAirport = closerAirport;
     }
 
-    public void setHotelOfficialRating(HotelRating hotelOfficialRating) {
+    public void setHotelOfficialRating(String hotelOfficialRating) {
         this.hotelOfficialRating = hotelOfficialRating;
     }
 
-    public void setPricePerNightForAdult(int pricePerNightForAdult) {
+    public void setPricePerNightForAdult(String pricePerNightForAdult) {
         this.pricePerNightForAdult = pricePerNightForAdult;
     }
 
-    public void setPricePerNightForKid(int pricePerNightForKid) {
+    public void setPricePerNightForKid(String pricePerNightForKid) {
         this.pricePerNightForKid = pricePerNightForKid;
     }
 
-    public void setFoodOption(FoodOption foodOption) {
+    public void setFoodOption(String foodOption) {
         this.foodOption = foodOption;
     }
 
-    public void setDuration(DurationOption duration) {
+    public void setDuration(String duration) {
         this.duration = duration;
     }
 
@@ -75,5 +77,21 @@ public class Hotel {
     @Override
     public int hashCode() {
         return Objects.hash(hotelName, locationCountry, locationCity);
+    }
+
+    @Override
+    public String toString() {
+        return "Hotel{" +
+                "id='" + id + '\'' +
+                ", hotelName='" + hotelName + '\'' +
+                ", locationCountry='" + locationCountry + '\'' +
+                ", locationCity='" + locationCity + '\'' +
+                ", closerAirport='" + closerAirport + '\'' +
+                ", hotelOfficialRating=" + hotelOfficialRating +
+                ", pricePerNightForAdult=" + pricePerNightForAdult +
+                ", pricePerNightForKid=" + pricePerNightForKid +
+                ", foodOption=" + foodOption +
+                ", duration=" + duration +
+                '}';
     }
 }

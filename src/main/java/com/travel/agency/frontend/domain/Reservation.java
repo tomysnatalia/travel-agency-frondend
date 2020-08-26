@@ -1,18 +1,18 @@
 package com.travel.agency.frontend.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.util.Objects;
+import java.util.regex.Pattern;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Reservation {
 
-    private String reservationId;
+    private String id = "";
     private String flightId;
     private String hotelId;
 
@@ -29,19 +29,36 @@ public class Reservation {
     private String paymentDate;
     private String hotelPriceWithFlight;
 
+    public boolean isSafeToUpdate() {
+        return !id.isEmpty() &&
+                this.alwaysRequiredFieldsAreFilled();
+    }
+
+    public boolean isSafeToSave() {
+        return id.isEmpty() && this.alwaysRequiredFieldsAreFilled();
+    }
+
+    private boolean alwaysRequiredFieldsAreFilled() {
+        Pattern emailPattern = Pattern.compile(".{3,}@.{2,}\\..{2,3}");
+        Pattern pricePattern = Pattern.compile("[0-9]+([.][0-9]{1,2})?");
+        return !(name.isEmpty() |
+                surname.isEmpty() |
+                !emailPattern.matcher(email).matches() |
+                !pricePattern.matcher(hotelPrice).matches()  );
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Reservation that = (Reservation) o;
-        return reservationId.equals(that.reservationId) &&
+        return id.equals(that.id) &&
                 flightId.equals(that.flightId) &&
                 hotelId.equals(that.hotelId);
     }
 
-    public void setReservationId(String reservationId) {
-        this.reservationId = reservationId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setFlightId(String flightId) {
@@ -88,16 +105,32 @@ public class Reservation {
         this.paymentStatus = paymentStatus;
     }
 
-    public void setPaymentDepositStatus(String paymentDepositStatus) {
-        this.paymentDepositStatus = paymentDepositStatus;
-    }
+    public void setPaymentDepositStatus(String paymentDepositStatus) { this.paymentDepositStatus = paymentDepositStatus; }
 
     public void setPaymentDate(String paymentDate) {
         this.paymentDate = paymentDate;
     }
 
-    public void setHotelPriceWithFlight(String hotelPriceWithFlight) {
-        this.hotelPriceWithFlight = hotelPriceWithFlight;
-    }
+    public void setHotelPriceWithFlight(String hotelPriceWithFlight) { this.hotelPriceWithFlight = hotelPriceWithFlight; }
 
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "id='" + id + '\'' +
+                ", flightId='" + flightId + '\'' +
+                ", hotelId='" + hotelId + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", numberOfAdults='" + numberOfAdults + '\'' +
+                ", numberOfKids='" + numberOfKids + '\'' +
+                ", hotelPrice='" + hotelPrice + '\'' +
+                ", deposit='" + deposit + '\'' +
+                ", paymentStatus='" + paymentStatus + '\'' +
+                ", paymentDepositStatus='" + paymentDepositStatus + '\'' +
+                ", paymentDate='" + paymentDate + '\'' +
+                ", hotelPriceWithFlight='" + hotelPriceWithFlight + '\'' +
+                '}';
+    }
 }
