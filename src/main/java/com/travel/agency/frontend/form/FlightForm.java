@@ -6,6 +6,7 @@ import com.travel.agency.frontend.domain.Flight;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -28,9 +29,9 @@ public class FlightForm extends FormLayout {
     private DatePicker returnDate = new DatePicker("return date");
     private TextField price = new TextField("price");
 
-    private Button save = new Button("Save");
-    private Button delete= new Button("Delete");
-    private Button back = new Button("back");
+    private Button save = new Button("save", VaadinIcon.CHECK.create());
+    private Button delete= new Button("delete", VaadinIcon.TRASH.create());
+    private Button back = new Button("back", VaadinIcon.ARROW_BACKWARD.create());
 
     Binder<Flight> binder = new Binder<>(Flight.class);
 
@@ -40,7 +41,7 @@ public class FlightForm extends FormLayout {
         this.mainView = mainView;
 
         HorizontalLayout buttons = new HorizontalLayout(save, delete, back);
-        add(id, departure, arrival, departureDate, returnDate, flightNumber, price,  buttons);
+        add(id, departure, arrival, departureDate, returnDate, flightNumber, price, buttons);
         binder.bindInstanceFields(this);
 
         save.addClickListener(event -> save());

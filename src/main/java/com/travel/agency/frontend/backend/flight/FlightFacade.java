@@ -15,32 +15,25 @@ public class FlightFacade {
     @Autowired
     private FlightClient flightClient;
 
-    public List<Flight> getAllFlights() {
-        return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlights()); }
+    public List<Flight> getAllFlights() { return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlights()); }
 
-    public Integer createFlight(final Flight flight) {
-        return flightClient.createFlight(flightMapper.mapToCreationFlightDto(flight)); }
+    public Integer createFlight(final Flight flight) { return flightClient.createFlight(flightMapper.mapToCreationFlightDto(flight)); }
 
-    public Flight updateFlight(final Flight flight) {
-        return flightMapper.mapToFlight(flightClient.updateFlight(flightMapper.mapToFlightDto(flight))); }
+    public Flight updateFlight(final Flight flight) { return flightMapper.mapToFlight(flightClient.updateFlight(flightMapper.mapToFlightDto(flight))); }
 
     public void deleteFlight(final Long id) {
         flightClient.deleteFlight(id);
     }
 
-    public List<Flight> findByDeparture(final String departure) {
-        return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlightByDeparture(departure)); }
+    public Flight findFlightById(final Long id) { return flightMapper.mapToFlight(flightClient.getFlightById(id)); }
 
-    public List<Flight> findByArrival(final String arrival) {
-        return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlightByArrival(arrival)); }
+    public List<Flight> findByDeparture(final String departure) { return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlightByDeparture(departure)); }
 
-    public List<Flight> findByFlightNumber(final String flightNumber) {
-        return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlightByFlightNumber(flightNumber)); }
+    public List<Flight> findByArrival(final String arrival) { return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlightByArrival(arrival)); }
 
-    public List<Flight> findByDepartureDate(final String departureDate) {
-        return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlightByDepartureDate(departureDate)); }
+    public List<Flight> findByFlightNumber(final String flightNumber) { return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlightByFlightNumber(flightNumber)); }
 
-    public List<Flight> findByReturnDate(final String returnDate) {
-        return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlightByReturnDate(returnDate));
-    }
+    public List<Flight> findByDepartureDate(final String departureDate) { return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlightByDepartureDate(departureDate)); }
+
+    public List<Flight> findByReturnDate(final String returnDate) { return flightMapper.mapToFlightListFromFlightListDto(flightClient.getFlightByReturnDate(returnDate)); }
 }

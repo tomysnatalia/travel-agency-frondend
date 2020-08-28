@@ -1,10 +1,8 @@
 package com.travel.agency.frontend.backend.hotel.mapper;
 
-import com.travel.agency.frontend.backend.flight.domain.CreationFlightDto;
 import com.travel.agency.frontend.backend.hotel.domain.CreationHotelDto;
 import com.travel.agency.frontend.backend.hotel.domain.HotelDto;
 import com.travel.agency.frontend.domain.hotel.Hotel;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -43,7 +41,6 @@ public class HotelMapper {
                 (Long.valueOf(hotel.getPricePerNightForKid())),
                 (String.valueOf(hotel.getFoodOption())),
                 (Long.valueOf(String.valueOf(hotel.getDuration()))));
-
     }
 
     public List<Hotel> mapToHotelList(List<HotelDto> hotelDtoList) {

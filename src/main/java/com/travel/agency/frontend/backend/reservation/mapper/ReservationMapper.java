@@ -1,5 +1,6 @@
 package com.travel.agency.frontend.backend.reservation.mapper;
 
+import com.travel.agency.frontend.backend.reservation.domain.CreationReservationDto;
 import com.travel.agency.frontend.backend.reservation.domain.ReservationDto;
 import com.travel.agency.frontend.domain.Reservation;
 import org.springframework.stereotype.Component;
@@ -58,5 +59,23 @@ public class ReservationMapper {
                 .distinct()
                 .map(this::mapToReservation)
                 .collect(Collectors.toList());
+    }
+
+    public CreationReservationDto mapToCreationReservationDto(Reservation reservation) {
+        return new CreationReservationDto(
+                (Long.valueOf(reservation.getFlightId())),
+                (Long.valueOf(reservation.getHotelId())),
+                reservation.getName(),
+                reservation.getSurname(),
+                reservation.getEmail(),
+                reservation.getPhoneNumber(),
+                (Long.valueOf(reservation.getNumberOfAdults())),
+                (Long.valueOf(reservation.getNumberOfKids())),
+                (Long.valueOf(reservation.getHotelPrice())),
+                (Long.valueOf(reservation.getDeposit())),
+                reservation.getPaymentStatus(),
+                reservation.getPaymentDepositStatus(),
+                (LocalDate.parse(reservation.getPaymentDate())),
+                (Long.valueOf(reservation.getHotelPriceWithFlight())));
     }
 }

@@ -7,7 +7,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -20,43 +19,41 @@ import org.springframework.stereotype.Component;
 public class ReservationForm extends FormLayout {
 
     private MainView mainView;
-    private final ReservationFacade reservationFacade;
+    private ReservationFacade reservationFacade;
 
+    private TextField id = new TextField("id");
+    private TextField flightId= new TextField("flightId");
+    private TextField hotelId = new TextField ("hotelId");
     private TextField name = new TextField("name");
     private TextField surname = new TextField("surname");
     private TextField email = new TextField("email");
     private TextField price = new TextField("price");
 
-    private TextField reservationId = new TextField("reservationId");
-    private TextField flightId= new TextField("flightId");
-    private TextField hotelId = new TextField ("hotelId");
-    private TextField phoneNumber = new TextField("phoneNumber");
-    private TextField numberOfAdults = new TextField("numberOfAdults");
-    private TextField numberOfKids= new TextField("numberOfKids");
+    private TextField phoneNumber = new TextField("phone number");
+    private TextField numberOfAdults = new TextField("adults");
+    private TextField numberOfKids= new TextField("kids");
+
+    private Button save = new Button("save", VaadinIcon.CHECK.create());
+    private Button delete= new Button("delete", VaadinIcon.TRASH.create());
+    private Button back = new Button("back", VaadinIcon.ARROW_BACKWARD.create());
 
     private Binder<Reservation> binder = new Binder<>(Reservation.class);
-
-    Button save = new Button("Save", VaadinIcon.CHECK.create());
-    Button delete = new Button("Delete", VaadinIcon.CHECK.create());
 
     @Autowired
     public ReservationForm(ReservationFacade reservationFacade, MainView mainView) {
         this.reservationFacade = reservationFacade;
         this.mainView = mainView;
-        HorizontalLayout buttons = new HorizontalLayout(save, delete);
-        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        add(reservationId, flightId, hotelId, name, surname, email, phoneNumber, numberOfAdults, numberOfKids, buttons
-        );
+        HorizontalLayout buttons = new HorizontalLayout(save, delete, back);
+        add(id, flightId, hotelId, name, surname, email, phoneNumber, numberOfAdults, numberOfKids, price, buttons);
         binder.bindInstanceFields(this);
 
         save.addClickListener(event -> save());
         delete.addClickListener(event -> delete());
+        back.addClickListener(event -> back());
     }
-
 
     public void setReservation(Reservation reservation) {
         binder.setBean(reservation);
-
         if (reservation == null) {
             setVisible(false);
         } else {
@@ -65,27 +62,26 @@ public class ReservationForm extends FormLayout {
         }
     }
 
-    void save() {
+    public void save() {
         Reservation reservation = binder.getBean();
-
-        if(reservation.isSafeToSave() && reservation.getId().equals("")) {
-           // reservationFacade.createReservation(reservation);
-        } else if(reservation.isSafeToUpdate()) {
-           // reservationFacade.updateReservation(reservation);
+        if (reservation.getId().isEmpty()) {
+            reservationFacade.createReservation(reservation);
         } else {
-            Notification.show("Fields are not filled properly!");
+            reservationFacade.updateReservation(reservation);
         }
-        mainView.refreshHotel();
+        mainView.refreshReservation();
         setReservation(null);
     }
 
-    void delete() {
+    public void delete() {
         Reservation reservation = binder.getBean();
+        reservationFacade.deleteReservation(Long.valueOf(reservation.getId()));
 
-        if(reservation.getId().chars().allMatch(Character::isDigit)) {
-          //  reservationFacade.deleteReservation(Long.parseLong(reservation.getId() ) );
-        }
-        mainView.refreshHotel();
+        mainView.refreshReservation();
+        setReservation(null);
+    }
+
+    public void back() {
         setReservation(null);
     }
 }

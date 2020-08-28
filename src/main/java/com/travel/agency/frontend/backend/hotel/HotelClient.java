@@ -1,12 +1,10 @@
 package com.travel.agency.frontend.backend.hotel;
 
-import com.travel.agency.frontend.backend.flight.domain.CreationFlightDto;
 import com.travel.agency.frontend.backend.flight.domain.FlightDto;
 import com.travel.agency.frontend.backend.hotel.domain.CreationHotelDto;
 import com.travel.agency.frontend.backend.hotel.domain.HotelDto;
 import com.travel.agency.frontend.config.AdminConfig;
 
-import com.travel.agency.frontend.domain.hotel.Hotel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +58,7 @@ public class HotelClient {
                 .path("/v3/hotel")
                 .build().encode().toUri();
         LOGGER.info("url: " + url);
+
         try {
             return restTemplate.exchange(url, HttpMethod.POST, request, Integer.class).getStatusCodeValue();
         } catch (RestClientException e) {
@@ -99,6 +98,23 @@ public class HotelClient {
             LOGGER.error(e.getMessage());
         }
     }
+
+    public HotelDto getHotelById(final Long id) {
+        URI url = UriComponentsBuilder.fromHttpUrl(adminConfig.getBackendHostAddress())
+                .path("/v3/hotelId/" + id)
+                .build().encode().toUri();
+        LOGGER.info("url: " + url);
+
+        try {
+            HotelDto response = restTemplate.getForObject(url, HotelDto.class);
+            return (response);
+        } catch (RestClientException e) {
+            LOGGER.error(e.getMessage());
+
+            return new HotelDto();
+        }
+    }
+
 
     public List<HotelDto> getHotelByName(final String hotelName) {
         URI url = UriComponentsBuilder.fromHttpUrl(adminConfig.getBackendHostAddress())
@@ -168,7 +184,22 @@ public class HotelClient {
             HotelDto[] response = restTemplate.getForObject(url, HotelDto[].class);
             return Arrays.asList(response);
         } catch (RestClientException e) {
-            LOGGER.error((e.getMessage()));
+            LOGGER.error(e.getMessage());
+
+            return new ArrayList<>();
+        }
+    }
+
+    public List<HotelDto> getHotelByDuration(final String duration) {
+        URI url = UriComponentsBuilder.fromHttpUrl(adminConfig.getBackendHostAddress())
+                .path("/v3/hotelDuration/" + duration)
+                .build().encode().toUri();
+
+        try {
+            HotelDto[] response = restTemplate.getForObject(url, HotelDto[].class);
+            return Arrays.asList(response);
+        } catch (RestClientException e) {
+            LOGGER.error(e.getMessage());
 
             return new ArrayList<>();
         }

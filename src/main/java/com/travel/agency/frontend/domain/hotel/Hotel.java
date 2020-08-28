@@ -1,14 +1,14 @@
 package com.travel.agency.frontend.domain.hotel;
 
-import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import lombok.AllArgsConstructor;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Objects;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Hotel {
@@ -23,46 +23,6 @@ public class Hotel {
     private String pricePerNightForKid;
     private String foodOption;
     private String duration;
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setHotelName(String hotelName) {
-        this.hotelName = hotelName;
-    }
-
-    public void setLocationCountry(String locationCountry) {
-        this.locationCountry = locationCountry;
-    }
-
-    public void setLocationCity(String locationCity) {
-        this.locationCity = locationCity;
-    }
-
-    public void setCloserAirport(String closerAirport) {
-        this.closerAirport = closerAirport;
-    }
-
-    public void setHotelOfficialRating(String hotelOfficialRating) {
-        this.hotelOfficialRating = hotelOfficialRating;
-    }
-
-    public void setPricePerNightForAdult(String pricePerNightForAdult) {
-        this.pricePerNightForAdult = pricePerNightForAdult;
-    }
-
-    public void setPricePerNightForKid(String pricePerNightForKid) {
-        this.pricePerNightForKid = pricePerNightForKid;
-    }
-
-    public void setFoodOption(String foodOption) {
-        this.foodOption = foodOption;
-    }
-
-    public void setDuration(String duration) {
-        this.duration = duration;
-    }
 
     @Override
     public boolean equals(Object o) {

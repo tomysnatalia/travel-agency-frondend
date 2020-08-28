@@ -16,10 +16,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Component;
@@ -41,28 +41,32 @@ public class MainView extends VerticalLayout {
     private HotelForm hotelForm;
     private Grid<Hotel> hotelGrid;
 
-    public TextField reservationNumber = new TextField("reservation number");
+    private Button buttonFlight = new Button("Flights", VaadinIcon.AIRPLANE.create());
+    private Button buttonHotels = new Button("Hotels", VaadinIcon.HOME.create());
+    private Button buttonReservation = new Button("Reservation", VaadinIcon.WALLET.create());
 
-    private Button buttonFlight = new Button("Flights");
-    private Button buttonHotels = new Button("Hotels");
-    private Button buttonReservation = new Button("Reservation");
-
+    private TextField flightId = new TextField("id");
     private TextField departure = new TextField("departure");
     private TextField arrival = new TextField("arrival");
     private DatePicker departureDate = new DatePicker("departure date");
     private DatePicker returnDate = new DatePicker("return date");
     private TextField flightNumber = new TextField("flight number");
 
-    private TextField hotelName = new TextField();
-    private TextField locationCountry = new TextField();
-    private TextField locationCity = new TextField();
-    private ComboBox hotelOfficialRating = new ComboBox<>("Hotel Stars");
-    private ComboBox foodOption = new ComboBox<>("Food option");
-    private ComboBox duration = new ComboBox<>("Duration");
+    private TextField hotelId = new TextField("id");
+    private TextField hotelName = new TextField("hotel");
+    private TextField locationCountry = new TextField("country");
+    private TextField locationCity = new TextField("city");
+    private ComboBox hotelOfficialRating = new ComboBox<>("hotel stars");
+    private ComboBox foodOption = new ComboBox<>("food option");
+    private ComboBox duration = new ComboBox<>("duration");
 
-    private Button addFlight = new Button("Add flight");
-    private Button addHotel = new Button("Add hotel");
-    private Button addReservation = new Button("Add reservation");
+    private TextField reservationId = new TextField("reservation number");
+    private TextField surname = new TextField("surname");
+    private TextField paymentDate = new TextField("payment date");
+
+    private Button addFlight = new Button("new flight", VaadinIcon.PLUS.create());
+    private Button addHotel = new Button("new hotel", VaadinIcon.PLUS.create());
+    private Button addReservation = new Button("new reservation", VaadinIcon.PLUS.create());
 
     public MainView(ReservationFacade reservationFacade, FlightFacade flightFacade, HotelFacade hotelFacade) {
         this.reservationFacade = reservationFacade;
@@ -92,28 +96,25 @@ public class MainView extends VerticalLayout {
 
             flightForm.setFlight(null);
 
-            HorizontalLayout mainContent = new HorizontalLayout(departure, arrival, flightNumber, departureDate, returnDate);
+            HorizontalLayout mainContent = new HorizontalLayout(flightId ,departure, arrival, flightNumber, departureDate, returnDate);
             add(mainContent);
             flightGrid.setColumns("id", "departure", "arrival", "departureDate", "returnDate", "flightNumber", "price");
             add(flightGrid, flightForm);
 
-            departure.setPlaceholder("filter by departure");
+            flightId.setClearButtonVisible(true);
+            flightId.addValueChangeListener(f -> searchByFlightId());
+
             departure.setClearButtonVisible(true);
-            departure.addValueChangeListener(f -> updateDeparture());
+            departure.addValueChangeListener(f -> searchByFlightDeparture());
 
-            arrival.setPlaceholder("filter by arrival");
             arrival.setClearButtonVisible(true);
-            arrival.addValueChangeListener(f -> updateArrival());
+            arrival.addValueChangeListener(f -> searchByFlightArrival());
 
-            flightNumber.setPlaceholder("filter by flight number");
             flightNumber.setClearButtonVisible(true);
-            flightNumber.addValueChangeListener(f -> updateFlightNumber());
+            flightNumber.addValueChangeListener(f -> searchByFlightNumber());
 
-            departureDate.setPlaceholder("filter by departure date");
-            departureDate.addValueChangeListener(f -> updateDepartureDate());
-
-            returnDate.setPlaceholder("filter by return date");
-            returnDate.addValueChangeListener(f -> updateReturnDate());
+            departureDate.addValueChangeListener(f -> searchFlightByDepartureDate());
+            returnDate.addValueChangeListener(f -> searchFlightByReturnDate());
 
             flightGrid.setSizeFull();
             refreshFlight();
@@ -124,115 +125,120 @@ public class MainView extends VerticalLayout {
 
         buttonHotels.addClickListener(e -> {
             removeAll();
-            HorizontalLayout toolBar3 = new HorizontalLayout(buttonFlight, buttonHotels, buttonReservation, addHotel);
+            HorizontalLayout toolBar3 = new HorizontalLayout(hotelId, buttonFlight, buttonHotels, buttonReservation, addHotel);
             add(toolBar3);
-            hotelName.setPlaceholder("Hotel name");
-            hotelName.setClearButtonVisible(true);
-            hotelName.setValueChangeMode(ValueChangeMode.EAGER);
-            hotelName.addValueChangeListener(h -> searchByHotel());
+            addHotel.addClickListener(add -> {
+                hotelGrid.asSingleSelect().clear();
+                hotelForm.setHotel(new Hotel());
+            });
 
-            locationCountry.setPlaceholder("Country");
+            hotelForm.setHotel(null);
+
+            hotelGrid.setColumns("id", "hotelName", "locationCountry", "locationCity", "closerAirport", "hotelOfficialRating", "foodOption", "duration", "pricePerNightForAdult", "pricePerNightForKid");
+            HorizontalLayout horizontalLayout = new HorizontalLayout(hotelId, hotelName, locationCountry, locationCity);
+            HorizontalLayout horizontalLayout2 = new HorizontalLayout(hotelOfficialRating, foodOption, duration);
+            add(horizontalLayout, horizontalLayout2);
+            add(hotelGrid);
+
+            hotelId.setClearButtonVisible(true);
+            hotelId.addValueChangeListener(h -> searchByHotelId());
+
+            hotelName.setClearButtonVisible(true);
+            hotelName.addValueChangeListener(h -> searchByHotelName());
+
             locationCountry.setClearButtonVisible(true);
-            locationCountry.setValueChangeMode(ValueChangeMode.EAGER);
             locationCountry.addValueChangeListener(h -> searchByCountry());
 
-            locationCity.setPlaceholder("City");
             locationCity.setClearButtonVisible(true);
-            locationCity.setValueChangeMode(ValueChangeMode.EAGER);
             locationCity.addValueChangeListener(h -> searchByCity());
-
 
             hotelOfficialRating.setItems(HotelRating.values());
             hotelOfficialRating.setPlaceholder("Rating stars");
-            //hotelOfficialRating.setClearButtonVisible(true);
-            hotelOfficialRating.addValueChangeListener(h -> searchByRating());
+            hotelOfficialRating.addValueChangeListener(h -> searchByHotelRating());
 
             foodOption.setItems(FoodOption.values());
             foodOption.setPlaceholder("Food options");
-            //foodOption.setClearButtonVisible(true);
             foodOption.addValueChangeListener(h -> searchByFoodOption());
 
             duration.setItems(DurationOption.values());
             duration.setPlaceholder("Duration");
-            //duration.setClearButtonVisible(true);
             duration.addValueChangeListener(h -> searchByDuration());
 
-            hotelGrid.setColumns("id", "hotelName", "locationCountry", "locationCity", "closerAirport", "hotelOfficialRating", "foodOption", "duration", "pricePerNightForAdult", "pricePerNightForKid");
-            HorizontalLayout horizontalLayout = new HorizontalLayout(hotelName, locationCountry, locationCity);
-            HorizontalLayout horizontalLayout2 = new HorizontalLayout(hotelOfficialRating, foodOption, duration);
-            add(horizontalLayout, horizontalLayout2);
-            add(hotelGrid);
-            setSizeFull();
+            hotelGrid.setSizeFull();
             refreshHotel();
-            setSizeFull();
             add(hotelForm);
             hotelForm.setHotel(null);
-            hotelGrid.asSingleSelect().addValueChangeListener(event -> hotelForm.setHotel((Hotel) hotelGrid.asSingleSelect().getValue()));
+            hotelGrid.asSingleSelect().addValueChangeListener(event -> hotelForm.setHotel(hotelGrid.asSingleSelect().getValue()));
         });
 
         buttonReservation.addClickListener(e -> {
             removeAll();
             HorizontalLayout toolBar4 = new HorizontalLayout(buttonFlight, buttonHotels, buttonReservation, addReservation);
             add(toolBar4);
-            add(reservationNumber);
+            addReservation.addClickListener(add -> {
+                reservationGrid.asSingleSelect().clear();
+                reservationForm.setReservation(new Reservation());
+            });
+
+            reservationForm.setReservation(null);
+
             reservationGrid.setColumns("id", "flightId", "hotelId", "name", "surname", "email", "phoneNumber", "numberOfAdults", "numberOfKids", "hotelPrice", "deposit", "paymentStatus", "paymentDepositStatus", "paymentDate", "hotelPriceWithFlight");
+            HorizontalLayout hotelLayout = new HorizontalLayout(reservationId, surname, paymentDate);
+            add(hotelLayout);
             add(reservationGrid);
-            reservationNumber.setPlaceholder("Reservation number");
-            reservationNumber.setClearButtonVisible(true);
-            reservationNumber.addValueChangeListener(event -> search());
+
+            reservationId.setClearButtonVisible(true);
+            reservationId.addValueChangeListener(event -> searchByReservationNumber());
+
+            surname.setClearButtonVisible(true);
+            surname.addValueChangeListener(event -> searchReservationBySurname());
+
             setSizeFull();
             refreshReservation();
             add(reservationForm);
             reservationForm.setReservation(null);
-            reservationGrid.asSingleSelect().addValueChangeListener(event -> reservationForm.setReservation((Reservation) reservationGrid.asSingleSelect().getValue()));
+            reservationGrid.asSingleSelect().addValueChangeListener(event -> reservationForm.setReservation(reservationGrid.asSingleSelect().getValue()));
         });
     }
 
-    public void search() {
-        //reservationGrid.setItems(reservationFacade.findBy(Long.valueOf(String.valueOf(reservationNumber.getValue()))));
-    }
+    public void refreshFlight() { flightGrid.setItems(flightFacade.getAllFlights());}
 
-    public void updateDeparture() {
-        flightGrid.setItems(flightFacade.findByDeparture(departure.getValue()));}
+    public void refreshHotel() { hotelGrid.setItems(hotelFacade.getAllHotels());}
 
-    public void updateArrival() {
-        flightGrid.setItems(flightFacade.findByArrival(arrival.getValue()));}
+    public void refreshReservation() { reservationGrid.setItems(reservationFacade.getAllReservations());}
 
-    public void updateFlightNumber() {
-        flightGrid.setItems(flightFacade.findByFlightNumber(flightNumber.getValue()));}
 
-    public void updateDepartureDate() {
-        flightGrid.setItems(flightFacade.findByDepartureDate(String.valueOf(departureDate.getValue()))); }
+    public void searchByFlightId() { flightGrid.setItems(flightFacade.findFlightById(Long.valueOf(flightId.getValue())));}
 
-    public void updateReturnDate(){
-        flightGrid.setItems(flightFacade.findByReturnDate(String.valueOf(returnDate.getValue()))); }
+    public void searchByFlightDeparture() { flightGrid.setItems(flightFacade.findByDeparture(departure.getValue()));}
 
-    public void refreshFlight() {
-        flightGrid.setItems(flightFacade.getAllFlights());}
+    public void searchByFlightArrival() { flightGrid.setItems(flightFacade.findByArrival(arrival.getValue()));}
 
-    public void refreshHotel() {
-        hotelGrid.setItems(hotelFacade.getAllHotels());}
+    public void searchByFlightNumber() { flightGrid.setItems(flightFacade.findByFlightNumber(flightNumber.getValue()));}
 
-    public void refreshReservation() {
-        reservationGrid.setItems(reservationFacade.getAllReservations());}
+    public void searchFlightByDepartureDate() { flightGrid.setItems(flightFacade.findByDepartureDate(String.valueOf(departureDate.getValue()))); }
 
-    private void searchByHotel() { hotelGrid.setItems(hotelFacade.findByHotelName(hotelName.getValue()));
-    }
+    public void searchFlightByReturnDate(){ flightGrid.setItems(flightFacade.findByReturnDate(String.valueOf(returnDate.getValue()))); }
 
-    private void searchByCountry() { hotelGrid.setItems(hotelFacade.findByLocationCountry(locationCountry.getValue()));
-    }
 
-    private void searchByCity() { hotelGrid.setItems(hotelFacade.findByLocationCity(locationCity.getValue()));
-    }
+    public void searchByHotelId() {hotelGrid.setItems(hotelFacade.findHotelById(Long.valueOf(hotelId.getValue())));}
 
-    private void searchByFoodOption() { hotelGrid.setItems(hotelFacade.findByFoodOption(String.valueOf(foodOption.getValue())));
-    }
+    public void searchByHotelName() { hotelGrid.setItems(hotelFacade.findByHotelName(hotelName.getValue())); }
 
-    private void searchByRating() { hotelGrid.setItems(hotelFacade.findByHotelOfficialRating(String.valueOf(hotelOfficialRating.getValue())));
-    }
+    public void searchByCountry() { hotelGrid.setItems(hotelFacade.findByLocationCountry(locationCountry.getValue())); }
 
-    private void searchByDuration() { //hotelGrid.setItems(hotelFacade.findByDuration(String.valueOf(duration.getValue())));
-    }
+    public void searchByCity() { hotelGrid.setItems(hotelFacade.findByLocationCity(locationCity.getValue())); }
+
+    public void searchByFoodOption() { hotelGrid.setItems(hotelFacade.findByFoodOption(String.valueOf(foodOption.getValue()))); }
+
+    public void searchByHotelRating() { hotelGrid.setItems(hotelFacade.findByHotelOfficialRating(String.valueOf((hotelOfficialRating.getValue())))); }
+
+    public void searchByDuration() { hotelGrid.setItems(hotelFacade.findByDuration(String.valueOf(duration.getValue()))); }
+
+
+    public void searchByReservationNumber() { reservationGrid.setItems(reservationFacade.findReservationById(Long.valueOf(reservationId.getValue()))); }
+
+    public void searchReservationBySurname() { reservationGrid.setItems(reservationFacade.findReservationBySurname(surname.getValue()));}
 }
 
 

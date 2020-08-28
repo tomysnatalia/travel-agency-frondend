@@ -96,6 +96,22 @@ public class FlightClient {
         }
     }
 
+    public FlightDto getFlightById(final Long id) {
+        URI url = UriComponentsBuilder.fromHttpUrl(adminConfig.getBackendHostAddress())
+                .path("/v3/flightId/" + id)
+                .build().encode().toUri();
+        LOGGER.info("url: " + url);
+
+        try {
+            FlightDto response = restTemplate.getForObject(url, FlightDto.class);
+            return (response);
+        } catch (RestClientException e) {
+            LOGGER.error(e.getMessage());
+
+            return new FlightDto();
+        }
+    }
+
     public List<FlightDto> getFlightByDeparture(final String departure) {
         URI url = UriComponentsBuilder.fromHttpUrl(adminConfig.getBackendHostAddress())
                 .path("/v3/departure/" + departure)

@@ -24,6 +24,8 @@ public class HotelFacade {
 
     public void deleteHotel(final Long id) { hotelClient.deleteHotel(id); }
 
+    public Hotel findHotelById(final Long id) { return hotelMapper.mapToHotel(hotelClient.getHotelById(id)); }
+
     public List<Hotel> findByHotelName(final String hotelName) { return hotelMapper.mapToHotelListFromHotelListDto(hotelClient.getHotelByName(hotelName)); }
 
     public List<Hotel> findByLocationCity(final String locationCity) { return hotelMapper.mapToHotelListFromHotelListDto(hotelClient.getHotelByCity(locationCity)); }
@@ -34,5 +36,5 @@ public class HotelFacade {
 
     public List<Hotel> findByFoodOption(final String foodOption) { return hotelMapper.mapToHotelListFromHotelListDto(hotelClient.getHotelByFoodOption(foodOption)); }
 
-
+    public List<Hotel> findByDuration(final String duration) { return hotelMapper.mapToHotelListFromHotelListDto((hotelClient.getHotelByDuration(duration))); }
 }
